@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() => runApp(MyApp());
 
@@ -30,12 +31,23 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   File _image;
+  Position _position;
 
-  Future getImage() async {
+  Future _getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
 
     setState(() {
       _image = image;
+    });
+  }
+
+  Future _getCurrentUserLocation() async {
+    var position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    print(position);
+
+    setState(() {
+      _position = position;
     });
   }
 
@@ -57,15 +69,19 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Expanded(
-                child: Center(
-              child: Text('Nothing here yet...'),
-            )),
+              child: Center(
+                child: _position == null
+                    ? Text('Nothing here yet...')
+                    : Text('$_position'),
+              ),
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          getImage();
+          _getImage();
+          _getCurrentUserLocation();
         },
         child: Icon(Icons.add_to_home_screen),
       ),
